@@ -1,0 +1,11 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: googleai
+spec:
+  type: conversation.googleai
+  metadata:
+  - name: key
+    value: <api key>
+  - name: cacheTTL
+    value: 10m

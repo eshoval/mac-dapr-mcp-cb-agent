@@ -1,0 +1,20 @@
+apiVersion: dapr.io/v1alpha1
+
+kind: Component
+
+metadata:
+  name: "openaiazure"
+
+spec:
+  type: conversation.openai
+  metadata:
+  - name: key
+    value: "<api key>"
+  - name: endpoint
+    value: "https://eyal-dapr-demo.openai.azure.com/"
+  - name: apiType
+    value: "azure"
+  - name: apiVersion
+    value: "2024-02-01"
+  - name: cacheTTL
+    value: 10m

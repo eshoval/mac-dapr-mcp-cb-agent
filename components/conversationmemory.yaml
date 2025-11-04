@@ -1,0 +1,19 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: conversationstore
+spec:
+  type: state.redis
+  version: v1
+  initTimeout: 30s
+  metadata:
+  - name: "redisHost"
+    value: "localhost:6379"
+  - name: "redisPassword"
+    value: ""
+  - name: "dialTimeout"
+    value: "10s"
+  - name: "readTimeout"
+    value: "5s"
+  - name: "writeTimeout"
+    value: "5s"
