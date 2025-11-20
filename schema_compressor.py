@@ -39,6 +39,13 @@ class SchemaCompressor:
             "scopes": {}
         }
         
+        # --- NEW: Pass through the discovered indexes ---
+        if "available_indexes" in schema:
+            compressed["available_indexes"] = schema["available_indexes"]
+            # [LOG 12 - Print]
+            print(f"  -> Compressor: Found and added {len(schema['available_indexes'])} available indexes to compressed schema.")
+        # --- END NEW ---
+        
         for scope_name, scope_data in schema.get("scopes", {}).items():
             compressed["scopes"][scope_name] = {
                 "collections": self._compress_collections(scope_data.get("collections", {}))

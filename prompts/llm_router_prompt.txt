@@ -19,10 +19,16 @@ Definition of the LLM router:
     3. If unsure, prefer using 'Tool needed:'.
 
     SQL++ GENERATION RULES (if querying is needed):
+    3.5 (CRITICAL): The {schema_context} JSON contains a top-level key "available_indexes" which lists all optimized GSI indexes.
+        - Your primary goal is to generate queries that USE these indexes.
+        - Examine the WHERE clause and JOIN conditions of your proposed query.
+        - Ensure that any fields used for filtering or joining (e.g., `ap.country` or `r.destinationairport`) have a corresponding index in the "available_indexes" list.
+        - DO NOT generate a query (like a nested-loop join that would cause error 5420) if a supporting index is not listed in {schema_context}.
     4. Use the provided schema context above - DO NOT perform schema discovery again.
     5. Generate a single, syntactically correct SQL++ query.
     6. For GROUP BY queries, ensure all non-aggregated fields in the SELECT clause are also listed in the GROUP BY clause.
-    7. For searching within arrays of objects, DO NOT use ARRAY_CONTAINS for partial matches. Instead, use the ANY ... IN ... SATISFIES syntax to check a specific field's value as shown in Example 4.
+    7. For searching within arrays of objects, DO NOT use ARRAY_CONTAINS for partial matches.
+       Instead, use the ANY ... IN ... SATISFIES syntax to check a specific field's value as shown in Example 4.
     8. Reference the collection directly in the FROM clause like:
        FROM `_default` AS d
        Do NOT include the scope name.

@@ -398,7 +398,7 @@ async def start():
         await cl.Message(content="Error: MCP_SERVER_URL environment variable not set.").send()
         return
 
-    client = MCPClient(timeout=60.0)
+    client = MCPClient(timeout=180.0)
     msg = None
     try:
         msg = cl.Message(content="🔌 Connecting to MCP server...")
@@ -478,7 +478,6 @@ async def start():
         "ROLE: Senior N1QL/SQL++ Database Engineer specializing in JSON document querying and optimization.",
         "SESSION BEHAVIOR: For query generation, rely on the already provided schema context.",
         "Your goal is ONLY to generate a valid SQL++ query based on the user's request and the schema context.",
-        "If the user asks a question that cannot be answered with a SQL++ query based on the schema, respond with 'Cannot answer this question based on the provided schema.'",
         "If the user asks for data modification (INSERT, UPDATE, DELETE), respond with 'Data modification queries are not supported.'",
         "Output ONLY the SQL++ query itself, prefixed with 'Tool needed:'. For example: 'Tool needed: SELECT * FROM my_bucket LIMIT 1;'",
         "Do NOT add explanations, justifications, or any text other than the prefix and the query.",
@@ -488,7 +487,8 @@ async def start():
         name="llm_agent",
         role="Senior SQL++ Couchbase Database Expert Engineer specializing in SQL++ Couchbase querying and optimization.",
         instructions=llm_instructions,
-        llm=DaprChatClient(component_name=component_name, provider=provider),
+        llm=DaprChatClient(component_name=component_name, provider=provider, timeout=180),
+        timeout=180
     )
     cl.user_session.set("llm_agent", llm_agent)
     await logger.log("Agent Init", "Ended", "LLM Agent created.") # <-- MODIFIED: await
@@ -504,6 +504,7 @@ async def start():
 #            "Do not add explanations, summaries, or any extra text.",
         ],
         tools=tools,
+        timeout=180
     )
     cl.user_session.set("tools_agent", tools_agent)
     await logger.log("Agent Init", "Ended", "Tools Agent created.") # <-- MODIFIED: await
@@ -605,21 +606,28 @@ async def main(message: cl.Message):
 async def end():
     """
     Saves the performance log and stats for the session when the user closes the chat.
-    """
+    """   
     logger = cl.user_session.get("logger")
+    print(">>> [APP DEBUG] @cl.on_chat_end: Function has been entered.")    
+    if not logger:
+        # This can happen if startup failed and logger was never set
+        print(">>> [APP DEBUG] @cl.on_chat_end: CRITICAL: Logger not found in session. Cannot log session end.")
+        return
+
+    # זה יהיה הלוג הראשון שיירשם בפונקציה זו
+    await logger.log("Chat Session End", "Started", "Received on_chat_end event from Chainlit framework.")
+    # --- סוף הוספת לוגים ---
     if logger and isinstance(logger, EnhancedPerformanceLogger):
         await logger.log("Chat Session", "Ended", "User session ended.") # <-- MODIFIED: await
         
         # --- NEW: Log summary stats ---
         summary_stats = logger.get_summary_stats()
         # This log call will automatically flush the final stats to the file
-        await logger.log("Session Summary", "Info", json.dumps(summary_stats, indent=2)) # <-- MODIFIED: await
+        await logger.log("Session Summary", "Info", json.dumps(summary_stats, indent=2)) 
         
-        # --- *** MODIFIED: Remove filename generation *** ---
-        # The filename is set at the start. We just call save_to_file()
-        # to print the final confirmation message.
+       
         
         try:
-            logger.save_to_file() # <-- MODIFIED: Removed filename argument
+            logger.save_to_file() 
         except Exception as e:
             print(f"Error printing log path on chat end: {e}")
