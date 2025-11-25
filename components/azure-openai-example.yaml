@@ -1,0 +1,23 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+
+metadata:
+  name: "azure-openai-sample"
+
+spec:
+  type: conversation.openai
+  metadata:
+  - name: key
+    value: "api key"
+  - name: endpoint
+    value: "azure openAI endpoint - dedicated endpoint created for this project"    
+  - name: apiType
+    value: "azure"    
+  - name: deploymentName
+    value: "<your deployment name>"  
+  - name: model
+    value: "gpt-4o"    
+  - name: apiVersion
+    value: "2024-12-01-preview"    
+  - name: cacheTTL
+    value: 10m
